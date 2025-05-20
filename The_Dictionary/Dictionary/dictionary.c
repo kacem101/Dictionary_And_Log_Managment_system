@@ -763,7 +763,7 @@ void updateWordInFile(const char* word, const char* syne, const char* anton){
         return;
     }
 
-    // Hardcoded filename - This function will always operate on this file.
+    
     const char* filename = "file.txt";
 
     FILE *original_file, *temp_file;
@@ -779,7 +779,7 @@ void updateWordInFile(const char* word, const char* syne, const char* anton){
         return;
     }
 
-    // Open a temporary file for writing ("w" mode). This file will hold the updated content.
+   
     temp_file = fopen(temp_filename, "w");
     if (temp_file == NULL) {
         perror("Error creating temporary file for update");
@@ -788,8 +788,7 @@ void updateWordInFile(const char* word, const char* syne, const char* anton){
     }
 
     printf("Updating file '%s' for word '%s'...\n", filename, word);
-
-    // Read the original file line by line until the end of the file (NULL is returned by fgets)
+	
     while (fgets(buffer, sizeof(buffer), original_file) != NULL) {
         char file_word[20]; // Temporary buffer to hold the word read from the current file line
         char file_syn[20]; // Temporary buffer for synonym part
@@ -803,8 +802,7 @@ void updateWordInFile(const char* word, const char* syne, const char* anton){
 
         int scan_result = sscanf(buffer_copy, "%19[^=]=%19[^#]#%19[^\n]", file_word, file_syn, file_ant);
 
-        // Check if sscanf successfully read at least the word part (scan_result >= 1)
-        // AND if the extracted word matches the target word we are looking for (strcmp == 0).
+
         if (scan_result >= 1 && strcmp(file_word, word) == 0) {
             fprintf(temp_file, "%s=%s#%s\n", file_word, syne, anton);
             printf("Found and updated line for word '%s'.\n", word);
@@ -1948,34 +1946,18 @@ void DeleateWordInFile(FILE*original_file,char*word){
         char file_syn[20]; // Temporary buffer for synonym part
         char file_ant[20]; // Temporary buffer for antonym part
 
-        // Create a copy of the buffer to parse. This is important because sscanf might
-        // modify the buffer, and we might need the original buffer content for lines
-        // that are not being updated or don't match the expected format.
         char buffer_copy[sizeof(buffer)];
         strncpy(buffer_copy, buffer, sizeof(buffer_copy) - 1); // Copy with size limit
         buffer_copy[sizeof(buffer_copy) - 1] = '\0'; // Ensure null termination for safety
 
-        // Remove trailing newline from buffer_copy if present. This is necessary
-        // for accurate string comparison and parsing.
         buffer_copy[strcspn(buffer_copy, "\n")] = 0;
 
-        // Attempt to parse the line using sscanf based on the expected format "word=syn#ant"
-        // - %19[^=] reads up to 19 characters excluding '=', into file_word.
-        // - = matches the literal '=' character.
-        // - %19[^#] reads up to 19 characters excluding '#', into file_syn.
-        // - # matches the literal '#' character.
-        // - %19[^\n] reads up to 19 characters excluding newline, into file_ant.
-        // sscanf returns the number of items successfully matched and assigned.
         int scan_result = sscanf(buffer_copy, "%19[^=]=%19[^#]#%19[^\n]", file_word, file_syn, file_ant);
 
-        // Check if sscanf successfully read at least the word part (scan_result >= 1)
-        // AND if the extracted word matches the target word we are looking for (strcmp == 0).
         if (scan_result >= 1 && strcmp(file_word, word) == 0) {
             found_and_updated = true; // Set the flag as the word was found and updated
         } else {
-            // This line does not contain the word to update, or its format is unexpected.
-            // Write the original line back to the temporary file.
-            // We use the original 'buffer' here because it includes the original newline character.
+
             fprintf(temp_file, "%s", buffer);
         }
     }
@@ -1993,8 +1975,7 @@ void DeleateWordInFile(FILE*original_file,char*word){
         return; // Exit the function
     }
 
-    // If the word was found and updated, proceed to replace the original file with the temporary file.
-    // First, remove the original file.
+
     if (remove(filename) != 0) {
         // If removing the original file fails, print an error.
         perror("Error removing original file for update");
@@ -2002,12 +1983,11 @@ void DeleateWordInFile(FILE*original_file,char*word){
         fprintf(stderr, "Temporary updated file saved as '%s'. Please manually replace '%s' with this file.\n", temp_filename, filename);
     }
     else {
-        // If the original file was successfully removed, rename the temporary file
-        // to the original filename.
+
         if (rename(temp_filename, filename) != 0) {
-            // If renaming fails, print an error.
+            
             perror("Error renaming temporary file to original filename");
-            // The original file is gone, and the updated content is in temp_filename. Inform the user.
+
             fprintf(stderr, "Updated file is in '%s', original was removed. Please manually rename '%s' to '%s'.\n", temp_filename, temp_filename, filename);
         }
         else {
